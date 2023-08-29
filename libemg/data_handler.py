@@ -460,6 +460,7 @@ class OnlineDataHandler(DataHandler):
         
         def update(frame):
             data = self.get_data()
+            # print(data)
             if len(data) > num_samples:
                 data = data[-num_samples:]
             if len(data) > 0:
@@ -612,6 +613,7 @@ class OnlineDataHandler(DataHandler):
                 data = pickle.loads(data)
                 timestamp = datetime.now()
                 """Justin: """
+                # TODO: Laura fix to how you want it
                 if data[0] == 0:  # EMG DATA
                     raw_data.add_emg(data)
                 if data[0] == 1:  # IMU DATA
