@@ -460,7 +460,6 @@ class OnlineDataHandler(DataHandler):
         
         def update(frame):
             data = self.get_data()
-            print(data)
             if len(data) > num_samples:
                 data = data[-num_samples:]
             if len(data) > 0:
