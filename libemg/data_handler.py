@@ -34,7 +34,6 @@ class DataHandler:
                 repeats += 1
         return repeats
 
-
     def _get_num_channels(self, data):
         return len(data[0])
 
@@ -61,7 +60,7 @@ class OfflineDataHandler(DataHandler):
         super().__init__()
     
 
-    def get_data(self, folder_location="", filename_dic={}, delimiter=",", mrdf_key='p_signal'):
+    def get_data_emg(self, folder_location="", filename_dic={}, delimiter=",", mrdf_key='p_signal'):
         """Method to collect data from a folder into the OfflineDataHandler object. Metadata can be collected either from the filename
         specifying <tag>_regex keys in the filename_dic, or from within the .csv or .txt files specifying <tag>_columns in the filename_dic.
 
@@ -164,7 +163,7 @@ class OfflineDataHandler(DataHandler):
         return active_labels
     
     def parse_windows(self, window_size, window_increment):
-        """Parses windows based on the acquired data from the get_data function.
+        """Parses windows based on the acquired data from the get_data_emg function.
 
         Parameters
         ----------
@@ -357,6 +356,9 @@ class OnlineDataHandler(DataHandler):
         if not file and not std_out and not emg_arr:
             raise Exception("Set either file, std_out, or emg_arr parameters or this class will have no functionality.")
 
+        # LP - we added in a timestamp as the first column in the emg/imu data, need to accommodate with the visualization methods
+        self.timestamp_added = True 
+
         # Deal with threading:
         BaseManager.register('RawData', RawData)
         manager = BaseManager()
@@ -386,9 +388,8 @@ class OnlineDataHandler(DataHandler):
         """
         self.fi = fi
 
-    def get_data(self):
+    def get_data_emg(self):
         data = np.array(self.raw_data.get_emg())
-        # data_all = np.concatenate((data, self.raw_data.get_imu()))
         
         if self.fi is not None:
             try:
@@ -397,10 +398,22 @@ class OnlineDataHandler(DataHandler):
                 pass
         if self.max_buffer:
             if len(data) > self.max_buffer:
-                self.raw_data.data = self.raw_data.adjust_increment(self.max_buffer, 0)
+                self.raw_data.data = self.raw_data.adjust_increment_emg(self.max_buffer, 0)
         return data
-        # return data_all
 
+    def get_data_imu(self):
+        data = np.array(self.raw_data.get_imu())
+        
+        if self.fi is not None:
+            try:
+                data = self.fi.filter(data)
+            except:
+                pass
+        if self.max_buffer:
+            if len(data) > self.max_buffer:
+                print("Length IMU data greater than max buffer size - adjusting increment imu")
+                self.raw_data.data = self.raw_data.adjust_increment_imu(self.max_buffer, 0)
+        return data
 
 
     def analyze_hardware(self, analyze_time=10):
@@ -450,7 +463,14 @@ class OnlineDataHandler(DataHandler):
         pyplot.style.use('ggplot')
         if not self._check_streaming():
             return
-        num_channels = len(self.get_data()[0])
+
+        # if we have the timestamp then we want to skip the first column that contains it
+        if self.timestamp_added:
+            num_channels = len(self.get_data_emg()[0]) - 2
+        else:
+            num_channels = len(self.get_data_emg()[0])
+        print(f"Number of emg channels: {num_channels} ({len(self.get_data_emg()[0])})")
+
         emg_plots = []
         figure, ax = pyplot.subplots()
         figure.suptitle('Raw Data', fontsize=16)
@@ -459,14 +479,18 @@ class OnlineDataHandler(DataHandler):
         figure.legend()
         
         def update(frame):
-            data = self.get_data()
+            data = self.get_data_emg()
             # print(data)
             if len(data) > num_samples:
                 data = data[-num_samples:]
             if len(data) > 0:
                 x_data = list(range(0,len(data)))
                 for i in range(0,num_channels):
-                    y_data = data[:,i]
+                    if self.timestamp_added:
+                        # need to grab one column over to accomodate for timestamp in first column
+                        y_data = data[:,i+2]
+                    else:
+                        y_data = data[:,i]
                     emg_plots[i][0].set_data(x_data, y_data)
                 figure.gca().relim()
                 figure.gca().autoscale_view()
@@ -490,6 +514,11 @@ class OnlineDataHandler(DataHandler):
             A list of two elements consisting of the y-axes.
         """
         pyplot.style.use('ggplot')
+
+        # if we have the timestamp then we want to skip the first column that contains it
+        # if self.timestamp_added:
+            # num_channels = len(self.get_data_emg()[0]) - 1
+
         emg_plots = []
         figure, axs = pyplot.subplots(len(channels), 1)
         figure.suptitle('Raw Data', fontsize=16)
@@ -498,13 +527,17 @@ class OnlineDataHandler(DataHandler):
             emg_plots.append(axs[i].plot([],[]))
 
         def update(frame):
-            data = self.get_data()
+            data = self.get_data_emg()
             if len(data) > num_samples:
                 data = data[-num_samples:]
+
             if len(data) > 0:
                 x_data = list(range(0,len(data)))
                 for i in range(0,len(channels)):
-                    y_data = data[:,i]
+                    if self.timestamp_added:
+                        y_data = data[:,i+2]
+                    else:
+                        y_data = data[:,i]
                     emg_plots[i][0].set_data(x_data, y_data)
                 
                     axs[i].relim()
@@ -576,7 +609,7 @@ class OnlineDataHandler(DataHandler):
             pc2 = []      
 
             def update(frame):
-                data = self.get_data()
+                data = self.get_data_emg()
                 if len(data) >= window_size:
                     window = get_windows(data, window_size, window_size)
                     features = fe.extract_features(feature_list, window)
@@ -597,7 +630,7 @@ class OnlineDataHandler(DataHandler):
                     ax.relim()
                     ax.autoscale_view()
 
-                    self.raw_data.adjust_increment(window_size, window_increment)
+                    self.raw_data.adjust_increment_emg(window_size, window_increment)
 
             animation = FuncAnimation(fig, update, interval=(1000/sampling_rate * window_increment))
             plt.show()
@@ -607,13 +640,17 @@ class OnlineDataHandler(DataHandler):
         sock.bind((self.ip, self.port))
         if self.options['file']:
             open(self.options['file_path'], "w").close()
+
         while True:
             data = sock.recv(4096)
             if data:
                 data = pickle.loads(data)
                 timestamp = datetime.now()
                 """Justin: """
-                # TODO: Laura fix to how you want it
+                # TODO: Laura fix this will only work for new trigno system with imu support
+                # data array will contain 0 at index 0 if it is emg data and 1 at index 0 if imu
+                # index 1 will contain a floating point timestamp from time.time()
+                # sensor data starts at index 2
                 if data[0] == 0:  # EMG DATA
                     raw_data.add_emg(data)
                 if data[0] == 1:  # IMU DATA
@@ -624,6 +661,8 @@ class OnlineDataHandler(DataHandler):
                     with open(self.options['file_path'], 'a', newline='') as file:
                         writer = csv.writer(file)
                         writer.writerow(data)
+                # if self.options['emg_arr']:
+                #     raw_data.add_emg(data)
 
 
     def _check_streaming(self, timeout=10):

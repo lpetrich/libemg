@@ -112,7 +112,7 @@ class ImuStreamer:
         while True:
             packet = self._data_socket.recv(self._min_recv_size)  # Justin: This seems really dodgy, are we guranteed to recieve the full packet?!?, I don't like non state machine like tcp code
             data = struct.unpack('<'+'f'*144, packet)
-            print(f'IMU Data: {data}')
+            # print(f'IMU Data: {data}')
 
             data = numpy.asarray(data)
             data = data[self.total_channels]

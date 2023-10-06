@@ -186,7 +186,7 @@ dic = {
     "classes_regex": classes_regex
 }
 odh = OfflineDataHandler()
-odh.get_data(folder_location=dataset_folder, filename_dic=dic, delimiter=",")
+odh.get_data_emg(folder_location=dataset_folder, filename_dic=dic, delimiter=",")
 
 # Extract training data:
 train_odh = odh.isolate_data(key="sets", values=[0])

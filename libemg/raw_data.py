@@ -8,7 +8,7 @@ class RawData:
         self.imu_data = []
 
     def get_imu(self):
-        return self.imu_data
+        return list(self.imu_data)
 
     def get_emg(self):
         return list(self.emg_data)
@@ -29,7 +29,12 @@ class RawData:
         with self.imu_lock:
             self.imu_data = []
     
-    def adjust_increment(self, window, increment):
+    def adjust_increment_emg(self, window, increment):
         with self.emg_lock:
             self.emg_data = self.emg_data[-window:]
             self.emg_data = self.emg_data[increment:window]
+
+    def adjust_increment_imu(self, window, increment):
+        with self.imu_lock:
+            self.imu_data = self.imu_data[-window:]
+            self.imu_data = self.imu_data[increment:window]

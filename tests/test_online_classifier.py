@@ -30,7 +30,7 @@ def test_emg_classifier():
         "classes_regex": classes_regex
     }
     odh = OfflineDataHandler()
-    odh.get_data(folder_location=dataset_folder, filename_dic = dic, delimiter=",")
+    odh.get_data_emg(folder_location=dataset_folder, filename_dic = dic, delimiter=",")
 
     windows, metadata = odh.parse_windows(50,25)
     test_data = np.loadtxt("tests/data/stream_data_tester.csv", delimiter=",")

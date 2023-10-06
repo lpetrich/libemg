@@ -77,7 +77,7 @@ dic = {
 }
 
 odh = OfflineDataHandler()
-odh.get_data(folder_location=dataset_folder, filename_dic=dic, delimiter=",")
+odh.get_data_emg(folder_location=dataset_folder, filename_dic=dic, delimiter=",")
 train_windows, train_metadata = odh.parse_windows(WINDOW_SIZE, WINDOW_INCREMENT)
 ```
 
@@ -153,7 +153,7 @@ dic = {
     "classes_regex": classes_regex
 }
 odh = OfflineDataHandler()
-odh.get_data(folder_location=dataset_folder, filename_dic = dic, delimiter=",")
+odh.get_data_emg(folder_location=dataset_folder, filename_dic = dic, delimiter=",")
 ```
 Using the `isolate_data` function, we can split the data into training and testing. In this specific case, we are splitting on the "reps" keyword and we want values with index 0-2 for training and 3-4 for testing. After isolating the data, we extract windows and associated metadata for both training and testing sets. 
 

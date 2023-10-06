@@ -66,7 +66,7 @@ class _3DCDataset(Dataset):
                 "subjects_regex": subjects_regex
             }
             odh = OfflineDataHandler()
-            odh.get_data(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
+            odh.get_data_emg(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
             return odh
 
 class Ninapro(Dataset):
@@ -168,7 +168,7 @@ class NinaproDB8(Ninapro):
                 "subjects_regex": subjects_regex
             }
             odh = OfflineDataHandler()
-            odh.get_data(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
+            odh.get_data_emg(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
             return odh
 
 class NinaproDB2(Ninapro):
@@ -194,7 +194,7 @@ class NinaproDB2(Ninapro):
                 "subjects_regex": subjects_regex
             }
             odh = OfflineDataHandler()
-            odh.get_data(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
+            odh.get_data_emg(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
             return odh
 
 # given a directory, return a list of files in that directory matching a format
@@ -241,7 +241,7 @@ class OneSubjectMyoDataset(Dataset):
                 "classes_regex": classes_regex,
             }
             odh = OfflineDataHandler()
-            odh.get_data(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
+            odh.get_data_emg(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
             return odh
 
 # class GRABMyo(Dataset):
@@ -297,7 +297,7 @@ class OneSubjectMyoDataset(Dataset):
 #                 "subjects_regex": subjects_regex
 #             }
 #             odh = OfflineDataHandler()
-#             odh.get_data(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
+#             odh.get_data_emg(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
 #             return odh
 
 #     def print_info(self):
@@ -374,5 +374,5 @@ class OneSubjectMyoDataset(Dataset):
 #                 "data_column": data_column
 #             }
 #             odh = OfflineDataHandler()
-#             odh.get_data(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
+#             odh.get_data_emg(folder_location=self.dataset_folder, filename_dic=dic, delimiter=",")
 #             return odh

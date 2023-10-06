@@ -107,7 +107,7 @@ dic = {
 }
 
 odh = OfflineDataHandler()
-odh.get_data(folder_location=dataset_folder, filename_dic=dic, delimiter=",")
+odh.get_data_emg(folder_location=dataset_folder, filename_dic=dic, delimiter=",")
 train_windows, train_metadata = odh.parse_windows(WINDOW_SIZE, WINDOW_INCREMENT)
 ```
 

@@ -136,6 +136,7 @@ def delsys_streamer(stream_ip='localhost', stream_port=12345, delsys_ip='localho
     p = Process(target=delsys.start_stream, daemon=True)
     p.start()
 
+    # imu streamer works the same as emg streamer just connects to different port
     delsys_imu = ImuStreamer(stream_ip = stream_ip,
                             stream_port = stream_port,
                             recv_ip=delsys_ip,

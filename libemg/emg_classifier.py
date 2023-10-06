@@ -514,7 +514,7 @@ class OnlineEMGClassifier:
         self.raw_data.reset_emg()
         while True:
             if len(self.raw_data.get_emg()) >= self.window_size:
-                data = self._get_data_helper()
+                data = self._get_data_emg_helper()
                 # Extract window and predict sample
                 window = get_windows(data[-self.window_size:][:], self.window_size, self.window_size)
 
@@ -523,12 +523,12 @@ class OnlineEMGClassifier:
                     features = fe.extract_features(self.features, window, self.classifier.feature_params)
                     # If extracted features has an error - give error message
                     if (fe.check_features(features) != 0):
-                        self.raw_data.adjust_increment(self.window_size, self.window_increment)
+                        self.raw_data.adjust_increment_emg(self.window_size, self.window_increment)
                         continue
                     classifier_input = self._format_data_sample(features)
                 else:
                     classifier_input = window
-                self.raw_data.adjust_increment(self.window_size, self.window_increment)
+                self.raw_data.adjust_increment_emg(self.window_size, self.window_increment)
                 prediction, probability = self.classifier._prediction_helper(self.classifier.classifier.predict_proba(classifier_input))
                 prediction = prediction[0]
                 probability = probability[0]
@@ -569,7 +569,7 @@ class OnlineEMGClassifier:
                 arr = np.hstack((arr, data[feat]))
         return arr
 
-    def _get_data_helper(self):
+    def _get_data_emg_helper(self):
         data = np.array(self.raw_data.get_emg())
         if self.filters is not None:
             try:
