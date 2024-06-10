@@ -498,7 +498,7 @@ class OnlineDataHandler(DataHandler):
                     figure.gca().set_ylim(y_axes)
             return emg_plots,
 
-        animation = FuncAnimation(figure, update, interval=100)
+        animation = FuncAnimation(figure, update, interval=100, cache_frame_data=False)
         pyplot.show()
 
     def visualize_channels(self, channels, num_samples=500, y_axes=None):
